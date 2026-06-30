@@ -15,26 +15,71 @@ Try to implement levels of difficulty.
 
 Add a timer to track how long the user takes to finish the game.
 
-
+Question types chosen by user, including random.
 */
+const string message = "--Math game--";
 
-static void MathGame(string welcomeMessage="--Math game--", int difficulty = 0, int gameLength = 5){
+static void MathGame(string welcomeMessage = "--Math game--")
+{
+    string[] gameTypes = ["Random", "Addition and Subtraction", "Multiplication", "Division"];
     Console.WriteLine(welcomeMessage);
+    Console.WriteLine("Difficulty: 0-5");
+    int difficulty = GetDifficulty(Console.ReadLine());
+    Console.WriteLine("Game length: 1 minimum:");
+    int gameLength = GetGameLength(Console.ReadLine());
     Console.WriteLine("Difficulty: " + difficulty);
     Console.WriteLine("Game length: " + gameLength);
+    Console.WriteLine("Choose game type: (0 - random; 1 - Addition and Subtraction; 2 - Multiplication; 3 - Division)");
+    Round(gameTypes, difficulty, gameLength, GetGameType(Console.ReadLine()));
 }
-string message = "--Math game--";
-Console.WriteLine("Difficulty: 0-5");
-int difficulty = int.Parse(Console.ReadLine());
-if (difficulty > 5){
-    difficulty = 5;
+static int Round(string[] gameTypes, int difficulty = 0, int gameLength = 5, int type = 0)
+{
+    Console.WriteLine(gameTypes[type]);
+    switch (type)
+    {
+        case 0:
+            return 0;  //Random
+        case 1:
+            return 1;  //Addition and subtraction
+        case 2:
+            return 2;  //Multiplication
+        case 3:
+            return 3;  //Division
+        default:
+            return -1; //Invalid
+    }
 }
-if (difficulty < 0){
-    difficulty = 0;
+static int GetDifficulty(string? difficultyUser = "0")
+{
+    int difficulty;
+    bool parsed = int.TryParse(difficultyUser, out difficulty); //Move into seperate unified function alongside GetGameLength() and GetGameType() parsing
+    if (parsed && difficulty > 0 && difficulty <= 5)
+    {
+        return difficulty;
+    }
+    return 0;
 }
-Console.WriteLine("Game length: 1 minimum:");
-int gameLength = int.Parse(Console.ReadLine());
-if (gameLength < 1){
-    gameLength = 1;
+static int GetGameLength(string? gameLengthUser = "5")
+{
+    int gameLength;
+    bool parsed = int.TryParse(gameLengthUser, out gameLength);
+    if (parsed && gameLength >= 1)
+    {
+        return gameLength;
+    }
+    return 5;
 }
-MathGame(message, difficulty, gameLength);
+static int GetGameType(string? typeUser)
+{
+    int type;
+    bool parsed = int.TryParse(typeUser, out type);
+    if(parsed && type>=0 && type <= 3)
+    {
+        return type;
+    }
+    return 0;
+}
+
+
+
+MathGame(message);
