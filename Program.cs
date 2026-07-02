@@ -30,9 +30,9 @@ static void MathGame(string welcomeMessage = "--Math game--")
     Console.WriteLine("Difficulty: " + difficulty);
     Console.WriteLine("Game length: " + gameLength);
     Console.WriteLine("Choose game type: (0 - random; 1 - Addition and Subtraction; 2 - Multiplication; 3 - Division)");
-    Round(gameTypes, difficulty, gameLength, GetGameType(Console.ReadLine()));
+    StartRound(gameTypes, difficulty, gameLength, GetGameType(Console.ReadLine()));
 }
-static int Round(string[] gameTypes, int difficulty = 0, int gameLength = 5, int type = 0)
+static int StartRound(string[] gameTypes, int difficulty = 0, int gameLength = 5, int type = 0)
 {
     Console.WriteLine(gameTypes[type]);
     switch (type)
@@ -49,22 +49,42 @@ static int Round(string[] gameTypes, int difficulty = 0, int gameLength = 5, int
             return -1; //Invalid
     }
 }
+static bool SafeParse(string? parsing)
+{
+    return int.TryParse(parsing, out _);
+}
 static int GetDifficulty(string? difficultyUser = "0")
 {
-    int difficulty;
-    bool parsed = int.TryParse(difficultyUser, out difficulty); //Move into seperate unified function alongside GetGameLength() and GetGameType() parsing
-    if (parsed && difficulty > 0 && difficulty <= 5)
+    difficultyUser ??= "0";
+    int difficulty = 0;
+    bool parsed = SafeParse(difficultyUser);
+    if (parsed)
     {
+        difficulty = int.Parse(difficultyUser);
+        if(difficulty < 0)
+        {
+            difficulty = 0;
+        }
+        if (difficulty > 5)
+        {
+            difficulty = 5;
+        }
         return difficulty;
     }
     return 0;
 }
 static int GetGameLength(string? gameLengthUser = "5")
 {
-    int gameLength;
-    bool parsed = int.TryParse(gameLengthUser, out gameLength);
-    if (parsed && gameLength >= 1)
+    gameLengthUser ??= "5";
+    int gameLength = 5;
+    bool parsed = SafeParse(gameLengthUser);
+    if (parsed)
     {
+        gameLength = int.Parse(gameLengthUser);
+        if (gameLength < 1)
+        {
+            gameLength = 1;
+        }
         return gameLength;
     }
     return 5;
@@ -79,7 +99,5 @@ static int GetGameType(string? typeUser)
     }
     return 0;
 }
-
-
 
 MathGame(message);
