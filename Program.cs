@@ -9,17 +9,17 @@ Users should be presented with a menu to choose an operation
 
 You should record previous games in a List and there should be an option in the menu for the user to visualize a history of previous games.
 
-You don't need to record results on a database. Once the program is closed the results will be deleted.
+You don't need to record results on a database. Once the program is closed the results will be deleted. ✓
 
-Try to implement levels of difficulty.
+Try to implement levels of difficulty. 
 
 Add a timer to track how long the user takes to finish the game.
 
-Question types chosen by user, including random.
+Question types chosen by user, including random. ✓
 */
-const string message = "--Math game--";
+const string WELCOME_MESSAGE = "--Math game--";
 
-static void MathGame(string welcomeMessage = "--Math game--")
+static string[] MathGame(string welcomeMessage = "--Math game--")
 {
     string[] gameTypes = ["Random", "Addition and Subtraction", "Multiplication", "Division"];
     Console.WriteLine(welcomeMessage);
@@ -30,24 +30,27 @@ static void MathGame(string welcomeMessage = "--Math game--")
     Console.WriteLine("Difficulty: " + difficulty);
     Console.WriteLine("Game length: " + gameLength);
     Console.WriteLine("Choose game type: (0 - random; 1 - Addition and Subtraction; 2 - Multiplication; 3 - Division)");
-    StartRound(gameTypes, difficulty, gameLength, GetGameType(Console.ReadLine()));
+    int gameType = GetGameType(Console.ReadLine());
+    return StartRound(gameTypes, difficulty, gameLength, gameType);
 }
-static int StartRound(string[] gameTypes, int difficulty = 0, int gameLength = 5, int type = 0)
+static bool ShowQuestion(int gameType, int difficulty)
+{
+    Console.WriteLine("--Question--");
+    return true;
+}
+static string[] StartRound(string[] gameTypes, int difficulty = 0, int gameLength = 5, int type = 0)
 {
     Console.WriteLine(gameTypes[type]);
-    switch (type)
+    int score = 0;
+    for(int i = 0; i < gameLength; i++)
     {
-        case 0:
-            return 0;  //Random
-        case 1:
-            return 1;  //Addition and subtraction
-        case 2:
-            return 2;  //Multiplication
-        case 3:
-            return 3;  //Division
-        default:
-            return -1; //Invalid
+        if(ShowQuestion(type, difficulty))
+        {
+            score++;
+        }
     }
+    string[] results = [gameTypes[type], gameLength.ToString(), difficulty.ToString(), score.ToString(), "00:00"];
+    return results;
 }
 static bool SafeParse(string? parsing)
 {
@@ -56,11 +59,10 @@ static bool SafeParse(string? parsing)
 static int GetDifficulty(string? difficultyUser = "0")
 {
     difficultyUser ??= "0";
-    int difficulty = 0;
     bool parsed = SafeParse(difficultyUser);
     if (parsed)
     {
-        difficulty = int.Parse(difficultyUser);
+        int difficulty = int.Parse(difficultyUser);
         if(difficulty < 0)
         {
             difficulty = 0;
@@ -99,5 +101,40 @@ static int GetGameType(string? typeUser)
     }
     return 0;
 }
+/*Round structure:
+[Type, length, difficulty, score, time]
+*/
+static void ShowHistory(List<string[]> history)
+{
+    int gameNum = 1;
+    foreach (string[] round in history)
+    {
+        string toWrite = $"#{gameNum} Game type: {round[0]}, rounds: {round[1]}, difficulty: {round[2]}, score: {round[3]}, time: {round[4]}.";
+        Console.WriteLine(toWrite);
+        gameNum++;
+    }
+    return;
+}
+List<string[]> gameHistory = [MathGame(WELCOME_MESSAGE)];
 
-MathGame(message);
+while (true)
+{
+    Console.WriteLine("Type \"start\" to start a new round, \"history\" to see previous games, or \"end\" to quit.");
+    string? option = Console.ReadLine();
+    option ??= "";
+    option = option.ToLower();
+    switch (option)
+    {
+        case "start":
+            gameHistory.Add(MathGame(WELCOME_MESSAGE));
+            break;
+        case "history":
+            ShowHistory(gameHistory);
+            break;
+        case "end":
+            Environment.Exit(0);
+            break;
+        default:
+            break;
+    }
+}
