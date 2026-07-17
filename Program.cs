@@ -19,6 +19,7 @@ Question types chosen by user, including random. ✓
 */
 const string WELCOME_MESSAGE = "--Math game--";
 
+
 static string[] MathGame(string welcomeMessage = "--Math game--")
 {
     string[] gameTypes = ["Random", "Addition and Subtraction", "Multiplication", "Division"];
@@ -33,10 +34,48 @@ static string[] MathGame(string welcomeMessage = "--Math game--")
     int gameType = GetGameType(Console.ReadLine());
     return StartRound(gameTypes, difficulty, gameLength, gameType);
 }
+static int getUserAnswer(string? input)
+{
+    if(int.TryParse(input ?? "0", out int parsed))
+    {
+        return parsed;
+    }
+    return 0;
+    
+}
 static bool ShowQuestion(int gameType, int difficulty)
 {
+    Random rnd = new Random();
     Console.WriteLine("--Question--");
-    return true;
+    switch (gameType) {
+        case 0: //Random
+            return false;
+        case 1: //Addition / Subtraction
+            int num1 = rnd.Next(0 + difficulty * 5, 1 + (difficulty * difficulty * difficulty)); // diff * 5 to diff^3
+            int num2 = rnd.Next(0 + difficulty * 5, 1 + (difficulty * difficulty * difficulty));
+            char oprtr = '-';
+            int sum = num1 - num2;
+            if (rnd.Next(2) == 0)
+            {
+                sum = num1 + num2;
+                oprtr = '+';
+            }
+            Console.Write($"{num1} {oprtr} {num2} = ");
+            if(getUserAnswer(Console.ReadLine()) == sum)
+            {
+                Console.WriteLine("Correct!");
+                return true;
+            }
+            Console.WriteLine($"Wrong! The answer is: {sum}x");
+            return false;
+        case 2: //Multiplication
+            return false;
+        case 3: //
+            return false;
+        default:
+            Console.WriteLine("Error: Invalid game type");
+            return false;
+    }
 }
 static string[] StartRound(string[] gameTypes, int difficulty = 0, int gameLength = 5, int type = 0)
 {
@@ -109,7 +148,7 @@ static void ShowHistory(List<string[]> history)
     int gameNum = 1;
     foreach (string[] round in history)
     {
-        string toWrite = $"#{gameNum} Game type: {round[0]}, rounds: {round[1]}, difficulty: {round[2]}, score: {round[3]}, time: {round[4]}.";
+        string toWrite = $"#{gameNum} Game type: {round[0]}; rounds: {round[1]}; difficulty: {round[2]}; score: {round[3]}/{round[1]} - {double.Round(int.Parse(round[3]) / int.Parse(round[1]), 2)}; time: {round[4]}.";
         Console.WriteLine(toWrite);
         gameNum++;
     }
