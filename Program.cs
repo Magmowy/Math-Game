@@ -17,6 +17,8 @@ Add a timer to track how long the user takes to finish the game.
 
 Question types chosen by user, including random. ✓
 */
+using System.Diagnostics;
+
 const string WELCOME_MESSAGE = "--Math game--";
 
 
@@ -51,14 +53,14 @@ static bool ShowQuestion(int gameType, int difficulty)
         case 0: //Random
             return false;
         case 1: //Addition / Subtraction
-            int num1 = rnd.Next(0 + difficulty * 5, 1 + (difficulty * difficulty * difficulty)); // diff * 5 to diff^3
-            int num2 = rnd.Next(0 + difficulty * 5, 1 + (difficulty * difficulty * difficulty));
-            char oprtr = '-';
-            int sum = num1 - num2;
+            int num1 = rnd.Next(0 + difficulty * 2, 20 + (difficulty * difficulty * difficulty)); // diff * 5 to diff^3
+            int num2 = rnd.Next(0 + difficulty * 2, 20 + (difficulty * difficulty * difficulty));
+            char oprtr = '+';
+            int sum = num1 + num2;
             if (rnd.Next(2) == 0)
             {
-                sum = num1 + num2;
-                oprtr = '+';
+                sum = num1 - num2;
+                oprtr = '-';
             }
             Console.Write($"{num1} {oprtr} {num2} = ");
             if(getUserAnswer(Console.ReadLine()) == sum)
@@ -66,7 +68,7 @@ static bool ShowQuestion(int gameType, int difficulty)
                 Console.WriteLine("Correct!");
                 return true;
             }
-            Console.WriteLine($"Wrong! The answer is: {sum}x");
+            Console.WriteLine($"Wrong! The answer is: {sum}");
             return false;
         case 2: //Multiplication
             return false;
@@ -79,6 +81,8 @@ static bool ShowQuestion(int gameType, int difficulty)
 }
 static string[] StartRound(string[] gameTypes, int difficulty = 0, int gameLength = 5, int type = 0)
 {
+    Stopwatch timer = new Stopwatch();
+    timer.Start();
     Console.WriteLine(gameTypes[type]);
     int score = 0;
     for(int i = 0; i < gameLength; i++)
@@ -88,7 +92,11 @@ static string[] StartRound(string[] gameTypes, int difficulty = 0, int gameLengt
             score++;
         }
     }
-    string[] results = [gameTypes[type], gameLength.ToString(), difficulty.ToString(), score.ToString(), "00:00"];
+    timer.Stop();
+    TimeSpan time = timer.Elapsed;
+    string timeDisplay = String.Format("{0:00}:{1:00}:{2:00}", time.Hours, time.Minutes, time.Seconds);
+    Console.WriteLine(timeDisplay);
+    string[] results = [gameTypes[type], gameLength.ToString(), difficulty.ToString(), score.ToString(), timeDisplay];
     return results;
 }
 static bool SafeParse(string? parsing)
@@ -148,7 +156,7 @@ static void ShowHistory(List<string[]> history)
     int gameNum = 1;
     foreach (string[] round in history)
     {
-        string toWrite = $"#{gameNum} Game type: {round[0]}; rounds: {round[1]}; difficulty: {round[2]}; score: {round[3]}/{round[1]} - {double.Round(int.Parse(round[3]) / int.Parse(round[1]), 2)}; time: {round[4]}.";
+        string toWrite = $"#{gameNum} Game type: {round[0]}; rounds: {round[1]}; difficulty: {round[2]}; score: {round[3]}/{round[1]} - {double.Round((double.Parse(round[3]) / double.Parse(round[1])) * 100)}%; time: {round[4]}.";
         Console.WriteLine(toWrite);
         gameNum++;
     }
