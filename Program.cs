@@ -1,26 +1,6 @@
-﻿/*
-You need to create a game that consists of asking the player what's the result of a math question (i.e. 9 x 9 = ?), collecting the input and adding a point in case of a correct answer.
-
-A game needs to have at least 5 questions.
-
-The divisions should result on INTEGERS ONLY and dividends should go from 0 to 100. Example: Your app shouldn't present the division 7/2 to the user, since it doesn't result in an integer.
-
-Users should be presented with a menu to choose an operation
-
-You should record previous games in a List and there should be an option in the menu for the user to visualize a history of previous games.
-
-You don't need to record results on a database. Once the program is closed the results will be deleted. ✓
-
-Try to implement levels of difficulty. 
-
-Add a timer to track how long the user takes to finish the game.
-
-Question types chosen by user, including random. ✓
-*/
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 const string WELCOME_MESSAGE = "--Math game--";
-
 
 static string[] MathGame(string welcomeMessage = "--Math game--")
 {
@@ -28,7 +8,7 @@ static string[] MathGame(string welcomeMessage = "--Math game--")
     Console.WriteLine(welcomeMessage);
     Console.WriteLine("Difficulty: 0-5");
     int difficulty = GetDifficulty(Console.ReadLine());
-    Console.WriteLine("Game length: 1 minimum:");
+    Console.WriteLine("Game length: 5 minimum:");
     int gameLength = GetGameLength(Console.ReadLine());
     Console.WriteLine("Difficulty: " + difficulty);
     Console.WriteLine("Game length: " + gameLength);
@@ -47,32 +27,70 @@ static int getUserAnswer(string? input)
 }
 static bool ShowQuestion(int gameType, int difficulty)
 {
-    Random rnd = new Random();
+    Random rnd = new();
     Console.WriteLine("--Question--");
-    switch (gameType) {
-        case 0: //Random
-            return false;
+    int num1;
+    int num2;
+    int answer;
+    int currGameType = gameType;
+    if (gameType == 0)
+    {
+        currGameType = rnd.Next(1, 3);
+    }
+    switch (currGameType) {
         case 1: //Addition / Subtraction
-            int num1 = rnd.Next(0 + difficulty * 2, 20 + (difficulty * difficulty * difficulty)); // diff * 5 to diff^3
-            int num2 = rnd.Next(0 + difficulty * 2, 20 + (difficulty * difficulty * difficulty));
+            num1 = rnd.Next(difficulty * 2, 20 + (difficulty * difficulty * difficulty)); // 0 - 20; 10 - 145
+            num2 = rnd.Next(difficulty * 2, 20 + (difficulty * difficulty * difficulty));
             char oprtr = '+';
-            int sum = num1 + num2;
+            answer = num1 + num2;
             if (rnd.Next(2) == 0)
             {
-                sum = num1 - num2;
+                answer = num1 - num2;
                 oprtr = '-';
             }
             Console.Write($"{num1} {oprtr} {num2} = ");
-            if(getUserAnswer(Console.ReadLine()) == sum)
+            if(getUserAnswer(Console.ReadLine()) == answer)
             {
                 Console.WriteLine("Correct!");
                 return true;
             }
-            Console.WriteLine($"Wrong! The answer is: {sum}");
+            Console.WriteLine($"Wrong! The answer is: {answer}");
             return false;
         case 2: //Multiplication
+            num1 = rnd.Next( ( difficulty + 1 ) * 2, ( difficulty + 1 ) * 5 ); //2 - 5; 12 - 30
+            num2 = rnd.Next( ( difficulty + 1 ) * 2, ( difficulty + 1 ) * 5 );
+            answer = num1 * num2;
+            Console.Write($"{num1} * {num2} = ");
+            if(getUserAnswer(Console.ReadLine()) == answer)
+            {
+                Console.WriteLine("Correct!");
+                return true;
+            }
+            Console.WriteLine($"Wrong! The answer is: {answer}");
             return false;
-        case 3: //
+        case 3: //Division
+            num1 = rnd.Next( difficulty * 3, ( difficulty + 1 ) * 16 + 4);// 0 - 20; 15 - 100
+            Console.WriteLine("num1: " + num1);
+            int maxNum2;
+            if(num1 == 0)
+            {
+                maxNum2 = 100;
+            }
+            else
+            {
+                maxNum2 = (int)num1/2;
+            }
+            num2 = rnd.Next( difficulty + 1 <= num1 ? 1 : difficulty+1, maxNum2 );
+            int moduloDiff = num1 % num2;
+            num1 -= moduloDiff;
+            answer = num1 / num2;
+            Console.Write($"{num1} / {num2} = ");
+            if (getUserAnswer(Console.ReadLine()) == answer)
+            {
+                Console.WriteLine("Correct!");
+                return true;
+            }
+            Console.WriteLine($"Wrong! The answer is: {answer}");
             return false;
         default:
             Console.WriteLine("Error: Invalid game type");
@@ -81,7 +99,7 @@ static bool ShowQuestion(int gameType, int difficulty)
 }
 static string[] StartRound(string[] gameTypes, int difficulty = 0, int gameLength = 5, int type = 0)
 {
-    Stopwatch timer = new Stopwatch();
+    Stopwatch timer = new();
     timer.Start();
     Console.WriteLine(gameTypes[type]);
     int score = 0;
@@ -129,20 +147,14 @@ static int GetGameLength(string? gameLengthUser = "5")
     bool parsed = SafeParse(gameLengthUser);
     if (parsed)
     {
-        gameLength = int.Parse(gameLengthUser);
-        if (gameLength < 1)
-        {
-            gameLength = 1;
-        }
-        return gameLength;
+        return gameLength < 5 ? 5 : gameLength;
     }
     return 5;
 }
 static int GetGameType(string? typeUser)
 {
-    int type;
-    bool parsed = int.TryParse(typeUser, out type);
-    if(parsed && type>=0 && type <= 3)
+    bool parsed = int.TryParse(typeUser, out int type);
+    if(parsed && type >=0 && type <= 3)
     {
         return type;
     }
@@ -156,7 +168,11 @@ static void ShowHistory(List<string[]> history)
     int gameNum = 1;
     foreach (string[] round in history)
     {
-        string toWrite = $"#{gameNum} Game type: {round[0]}; rounds: {round[1]}; difficulty: {round[2]}; score: {round[3]}/{round[1]} - {double.Round((double.Parse(round[3]) / double.Parse(round[1])) * 100)}%; time: {round[4]}.";
+        string toWrite = $"#{gameNum} Game type: {round[0]}; " +
+            $"rounds: {round[1]}; " +
+            $"difficulty: {round[2]}; " +
+            $"score: {round[3]}/{round[1]} - {double.Round((double.Parse(round[3]) / double.Parse(round[1])) * 100)}%; " +
+            $"time: {round[4]}.";
         Console.WriteLine(toWrite);
         gameNum++;
     }
